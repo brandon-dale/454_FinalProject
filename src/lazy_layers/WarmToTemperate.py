@@ -9,7 +9,7 @@ class WarmToTemperate(Layer):
     def __init__(self):
         """Constructs a new WarmToTemperate Layer Object"""
     
-    def run(board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
         Runs the layer for a single step
         :param board: A 2D array containing the input board state

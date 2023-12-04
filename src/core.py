@@ -29,8 +29,8 @@ def np_random(seed: Optional[int] = None) -> Tuple[np.random.Generator, Any]:
 
 # map cell states to RGB colors
 _COLOR_MAP = {
-    cell.OCEAN: (0, 0, 255),
-    cell.LAND: (0, 255, 0)
+    cell.OCEAN: (30,144,255),
+    cell.LAND: 	(255,250,205)
 }
 
 
@@ -38,11 +38,21 @@ def draw(board: np.ndarray) -> None:
     """
     Draws the board
     """
-    # Convert to colors array
-    # new_array = np.zeros((a.shape + (3,)))
-    # for i in range(a.shape[0]):
-    #     for j in range(a.shape[-1]):
-    #         new_array[i, j, 0] = a[i, j][0]
-    #         new_array[i, j, 1] = a[i, j][1]
-    #         new_array[i, j, 2] = a[i, j][2]
+    # Expand board to RGB image
+    assert board.shape[0] == board.shape[1], "CANNOT DRAW A NON-SQUARE BOARD"
+    dim = board.shape[0]
+    colors = np.zeros((board.shape + (3,)), dtype=int)
+    for i in range(dim):
+        for j in range(dim):
+            r, g, b = _COLOR_MAP[board[i, j]]
+            colors[i, j, 0] = r
+            colors[i, j, 1] = g
+            colors[i, j, 2] = b
+
+    plt.imshow(colors, extent=[0, dim, 0, dim])
+    ax = plt.gca()
+    ticks = np.arange(0, dim + 1, int(dim/4.))
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+    plt.show()
     

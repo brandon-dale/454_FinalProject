@@ -7,7 +7,7 @@ class Layer:
     def __init__(self):
         """Constructs a new Layer Object"""
     
-    def run(board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
         Runs the layer for a single step
         Implemented in child classes
