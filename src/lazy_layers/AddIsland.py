@@ -1,5 +1,5 @@
 import numpy as np
-import core as cell
+from core import cell
 from layer import Layer
 
 class AddIsland(Layer):
