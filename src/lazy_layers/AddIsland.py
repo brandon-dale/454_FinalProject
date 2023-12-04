@@ -22,6 +22,6 @@ class AddIsland(Layer):
 
         # Iterating over the edge cells
         for i in range(rows):
-            for j in [0, cols-1]:  # First and last column
-                board[i][j] = cell.LAND if rng.random() < 0.75 else cell.OCEAN
+            for j in range(cols):
+                board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
         return board
