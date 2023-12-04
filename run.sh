@@ -1,1 +1,1 @@
-/usr/local/bin/python3.10 src/main.py
+python src/main.py

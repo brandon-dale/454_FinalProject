@@ -1,6 +1,5 @@
-
 import numpy as np
-from layer import Layer
+from lazy_layers.layer import Layer
 
 class Island(Layer):
     """
