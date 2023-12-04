@@ -1,6 +1,6 @@
 import numpy as np
 from core import cell
-from layer import Layer
+from lazy_layers.layer import Layer
 
 class AddIsland(Layer):
     """
