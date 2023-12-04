@@ -9,7 +9,7 @@ class Zoom(Layer):
     def __init__(self):
         """Constructs a new Zoom Layer Object"""
     
-    def run(board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
         Runs the layer for a single step
         :param board: A 2D array containing the input board state
@@ -18,8 +18,8 @@ class Zoom(Layer):
         """
         # Scale the board by a factor of 2
         scaled_board = np.repeat(np.repeat(board, 2, axis=0), 2, axis=1)
-	indexes = [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
-
+        indexes = [-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]
+     
         rows, cols = scaled_board.shape
 
         for i in range(rows):
