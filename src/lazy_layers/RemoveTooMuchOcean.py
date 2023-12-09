@@ -10,11 +10,41 @@ class RemoveTooMuchOcean(Layer):
     
     def __init__(self):
         """Constructs a new RemoveTooMuchOcean Layer Object"""
-    
+        super().__init__()
+
     def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
-        Runs the layer for a single step
+        Runs the layer for a single step.
         :param board: A 2D array containing the input board state
+        :param rng: A random number generator
         :return: A new copy of the board after the transformation
         """
-        raise NotImplementedError
+        new_board = np.copy(board)
+        rows, cols = board.shape
+
+        for i in range(rows):
+            for j in range(cols):
+                if board[i, j] == 0:  # Assuming 0 represents ocean
+                    # Check if surrounded by ocean
+                    if self.is_surrounded_by_ocean(board, i, j):
+                        # 50% chance to become land
+                        if rng.uniform() < 0.5:
+                            new_board[i, j] = 1  # Assuming 1 represents land
+
+        return new_board
+
+    def is_surrounded_by_ocean(self, board, i, j):
+        """
+        Check if the cell is surrounded by ocean in up/down and left/right.
+        """
+        rows, cols = board.shape
+        # Check up, down, left, and right cells
+        if i > 0 and board[i-1, j] != 1:  # Check up
+            return False
+        if i < rows - 1 and board[i+1, j] != 1:  # Check down
+            return False
+        if j > 0 and board[i, j-1] != 1:  # Check left
+            return False
+        if j < cols - 1 and board[i, j+1] != 1:  # Check right
+            return False
+        return Trueror
