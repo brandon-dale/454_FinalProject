@@ -1,6 +1,6 @@
 import numpy as np
 from lazy_layers.layer import Layer
-from core import Cell, is_edge_cel
+from core import Cell, is_edge_cell
 import copy
 
 class FreezingToCold(Layer):

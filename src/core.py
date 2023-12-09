@@ -129,6 +129,11 @@ def draw(board: np.ndarray, title: str, out_file: str=None) -> None:
         plt.show()
     
 
+def make_gif(dir_path: str) -> None:
+    raise NotImplementedError
+
+
+
 def in_bounds(board: np.ndarray, row_ind: int, col_ind: int):
     """
     Check if the cell at board[row_ind][col_ind] is in the bounds of the board
@@ -202,6 +207,18 @@ def is_edge_cell(board: np.ndarray, row_ind: int, col_ind: int, allowed_cells: S
 
 def set_board_region(board: np.ndarray, row_ind: int, col_ind: int, radius: int, set_val: Cell):
     """
-    
+    Set a region of the board around (row_ind, col_ind) with a radius of radius to
+    the specified value
     """
-    raise NotImplementedError
+    n_rows, n_cols = board.shape
+    i_start = max(0, row_ind-radius)
+    i_end = min(row_ind+1+radius, n_rows)
+    j_start = max(0, col_ind-radius)
+    j_end = min(col_ind+1+radius, n_cols)
+    
+    for i in range(i_start, i_end):
+        for j in range(j_start, j_end):
+            board[i][j] = set_val
+    
+    return board
+    
