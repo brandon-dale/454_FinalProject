@@ -1,6 +1,7 @@
 import numpy as np
 from core import cell
 from lazy_layers.layer import Layer
+import copy
 
 class AddIsland(Layer):
     """
@@ -18,10 +19,11 @@ class AddIsland(Layer):
         :param rng: A random number generator
         :return: A new copy of the board after the transformation
         """
+        next_board = copy.deepcopy(board)
         rows, cols = board.shape
 
         # Iterating over the edge cells
         for i in range(rows):
             for j in range(cols):
-                board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
-        return board
+                next_board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
+        return next_board
