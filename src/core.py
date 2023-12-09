@@ -121,7 +121,7 @@ def draw(board: np.ndarray, title: str, out_file: str=None) -> None:
     ticks = np.arange(0, dim + 1, int(dim/4.))
     ax.set_xticks(ticks)
     ax.set_yticks(ticks)
-    ax.title(title)
+    # ax.title(title)
     
     if out_file is not None:
         plt.savefig(out_file)
@@ -175,7 +175,7 @@ def is_edge_cell(board: np.ndarray,
     :param board: a 2d board to use
     :param row_ind: a valid row index to use
     :param col_ind: a valid column index to use
-    :param group_a: A set of cells considered in one group
+    :param group_a: A set of cells considered in one group to ignore
     :param group_b: A set of cells in a second comparison group
     :return: true if board[row_ind][col_ind] is an edge cell    
     """

@@ -1,6 +1,6 @@
 import numpy as np
  
-from core import np_random, draw, cell
+from core import np_random, draw, Cell
 from lazy_layers.Island import Island
 from lazy_layers.Zoom import Zoom
 from lazy_layers.FuzzyZoom import FuzzyZoom
@@ -16,12 +16,12 @@ def build(rng: np.random.Generator) -> np.ndarray:
     # Run the stack
     print(f"Running Layer : {island_layer.__class__.__name__}")
     board: np.ndarray = island_layer.run(4, rng)
-    draw(board, 'init')
+    draw(board, 'init', 'init')
     
     for layer in stack:
         print(f"Running Layer : {layer.__class__.__name__}")
         board = layer.run(board, rng)
-        draw(board, 'fuzzy-zoom')
+        draw(board, 'fuzzy-zoom', 'fuzzy-zoom')
     
     return board
 
@@ -31,7 +31,7 @@ def main():
     
     board = build(rng)
     
-    draw(board)
+    draw(board, "main board", 'main_board')
     
 
 if __name__ == '__main__':
