@@ -1,5 +1,5 @@
 import numpy as np
-from core import cell
+from core import Cell
 from lazy_layers.layer import Layer
 import copy
 
