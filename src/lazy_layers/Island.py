@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import Generator
 from lazy_layers.layer import Layer
-from core import cell
+from core import Cell
 
 class Island(Layer):
     """
@@ -23,9 +23,9 @@ class Island(Layer):
         """
         PROB_LAND = 0.1
         
-        board = np.zeros((dims, dims), dtype=cell)
+        board = np.zeros((dims, dims), dtype=Cell)
         for i in range(dims):
             for j in range(dims):
-                board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) <= PROB_LAND else cell.OCEAN
+                board[i][j] = Cell.LAND if rng.uniform(0.0, 1.0) <= PROB_LAND else Cell.OCEAN
 
         return board

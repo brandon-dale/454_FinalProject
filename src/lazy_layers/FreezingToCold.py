@@ -29,7 +29,7 @@ class FreezingToCold(Layer):
         for i in range(rows):
             for j in range(cols):
                 curr: Cell = board[i][j]
-                if is_edge_cel(board, i, j, allowed_cells):
+                # if is_edge_cel(board, i, j, allowed_cells):
                     
                     
         return next_board
