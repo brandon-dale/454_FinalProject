@@ -5,8 +5,8 @@ import copy
 
 class AddIsland(Layer):
     """
-    Processing layer in world generation.    
-    Each edge cell has a random probability of toggling.
+    Processing layer in world generation.
+    Each edge cell between land and ocean has a 75% chance of becoming land and a 25% chance of becoming ocean.
     """
     
     def __init__(self):
@@ -22,8 +22,26 @@ class AddIsland(Layer):
         next_board = copy.deepcopy(board)
         rows, cols = board.shape
 
+        # Function to determine if a cell is an edge between land and ocean
+        def is_edge_cell(r, c):
+            if board[r][c] == cell.LAND:
+                # Check adjacent cells for ocean
+                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == cell.OCEAN:
+                        return True
+            elif board[r][c] == cell.OCEAN:
+                # Check adjacent cells for land
+                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == cell.LAND:
+                        return True
+            return False
+
         # Iterating over the edge cells
         for i in range(rows):
             for j in range(cols):
-                next_board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
+                if is_edge_cell(i, j):
+                    next_board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
+
         return next_board
