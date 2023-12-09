@@ -124,7 +124,7 @@ def draw(board: np.ndarray, title: str, out_file: str=None) -> None:
     # ax.title(title)
     
     if out_file is not None:
-        plt.savefig(out_file)
+        plt.savefig('imgs/' + out_file)
     else:
         plt.show()
     

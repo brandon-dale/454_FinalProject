@@ -12,7 +12,7 @@ class AddIsland(Layer):
     def __init__(self):
         """Constructs a new AddIsland Layer Object"""
     
-    def run(board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
         Runs the layer for a single step
         :param board: A 2D array containing the input board state
@@ -24,17 +24,17 @@ class AddIsland(Layer):
 
         # Function to determine if a cell is an edge between land and ocean
         def is_edge_cell(r, c):
-            if board[r][c] == cell.LAND:
+            if board[r][c] == Cell.LAND:
                 # Check adjacent cells for ocean
                 for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                     nr, nc = r + dr, c + dc
-                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == cell.OCEAN:
+                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == Cell.OCEAN:
                         return True
-            elif board[r][c] == cell.OCEAN:
+            elif board[r][c] == Cell.OCEAN:
                 # Check adjacent cells for land
                 for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                     nr, nc = r + dr, c + dc
-                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == cell.LAND:
+                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == Cell.LAND:
                         return True
             return False
 
@@ -42,6 +42,6 @@ class AddIsland(Layer):
         for i in range(rows):
             for j in range(cols):
                 if is_edge_cell(i, j):
-                    next_board[i][j] = cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else cell.OCEAN
+                    next_board[i][j] = Cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else Cell.OCEAN
 
         return next_board

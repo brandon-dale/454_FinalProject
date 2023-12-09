@@ -24,12 +24,13 @@ class FreezingToCold(Layer):
         next_board = copy.deepcopy(board)
         rows, cols = board.shape
         
-        allowed_cells = set([Cell.FREEZING, Cell.WARM, Cell.TEMPERATE])
+        group_a = set([Cell.FREEZING])
+        group_b = set([Cell.WARM, Cell.TEMPERATE])
         
         for i in range(rows):
             for j in range(cols):
                 curr: Cell = board[i][j]
-                # if is_edge_cel(board, i, j, allowed_cells):
-                    
+                if is_edge_cell(board, i, j, group_a, group_b):
+                    next_board = set_board_region(board, i, j, 1, Cell.COLD)
                     
         return next_board
