@@ -6,8 +6,9 @@ import copy
 class AddIsland(Layer):
     """
     Processing layer in world generation.
-    Each edge cell between land and ocean has a 75% chance of becoming land and a 25% chance of becoming ocean.
+    Each edge cell between land and ocean has a 60% chance of becoming land and a 40% chance of becoming ocean.
     """
+    P_LAND = 0.6
     
     def __init__(self):
         """Constructs a new AddIsland Layer Object"""
@@ -42,6 +43,6 @@ class AddIsland(Layer):
         for i in range(rows):
             for j in range(cols):
                 if is_edge_cell(i, j):
-                    next_board[i][j] = Cell.LAND if rng.uniform(0.0, 1.0) < 0.75 else Cell.OCEAN
+                    next_board[i][j] = Cell.LAND if rng.uniform(0.0, 1.0) < AddIsland.P_LAND else Cell.OCEAN
 
         return next_board
