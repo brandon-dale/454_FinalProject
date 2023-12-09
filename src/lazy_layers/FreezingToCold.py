@@ -1,6 +1,6 @@
 import numpy as np
 from lazy_layers.layer import Layer
-from core import Cell, is_edge_cell
+from core import Cell, is_edge_cell, set_board_region
 import copy
 
 class FreezingToCold(Layer):
@@ -29,6 +29,7 @@ class FreezingToCold(Layer):
         for i in range(rows):
             for j in range(cols):
                 curr: Cell = board[i][j]
-                # if is_edge_cel(board, i, j):
+                if is_edge_cel(board, i, j, allowed_cells):
+                    
                     
         return next_board

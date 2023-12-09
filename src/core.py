@@ -163,7 +163,11 @@ def get_neighbors(board: np.ndarray, row_ind: int, col_ind: int, radius: int = 1
     return board[i_start:i_end, j_start:j_end]
 
 
-def is_edge_cell(board: np.ndarray, row_ind: int, col_ind: int, allowed_cells: Set[Cell] = None):
+def is_edge_cell(board: np.ndarray, 
+                 row_ind: int, 
+                 col_ind: int, 
+                 group_a: Set[Cell] = None, 
+                 group_b: Set[Cell] = None):
     """
     Check if the cell at board[row_ind][col_ind] is an edge cell.
     Is an edge cell if any surrounding cells have a different value
@@ -171,36 +175,40 @@ def is_edge_cell(board: np.ndarray, row_ind: int, col_ind: int, allowed_cells: S
     :param board: a 2d board to use
     :param row_ind: a valid row index to use
     :param col_ind: a valid column index to use
-    :param allowed_cells: a list of cells allowed to be considered in edge decisions
-                          Defaults to all possible cell values
+    :param group_a: A set of cells considered in one group
+    :param group_b: A set of cells in a second comparison group
     :return: true if board[row_ind][col_ind] is an edge cell    
     """
-    if allowed_cells is None:
-        allowed_cells = set([e.value for e in Cell])
-    
     n_rows, n_cols = board.shape
     center_val = board[row_ind][col_ind]
     is_edge: bool = False
     
-    if center_val not in allowed_cells:
+    if group_a is None:
+        group_a = set([center_val])
+        group_b = set([e.value for e in Cell if e not in group_a])
+    
+    if center_val not in group_a and center_val not in group_b:
         return False
+    
+    key_set = group_a if center_val in group_a else group_b
+    target_set = group_b if center_val in group_b else group_a
     
     # left
     is_edge = is_edge or (col_ind-1 >= 0 and 
                           board[row_ind][col_ind-1] != center_val and 
-                          board[row_ind][col_ind-1] in allowed_cells)
+                          board[row_ind][col_ind-1] in target_set)
     # right
     is_edge = is_edge or (col_ind+1 < n_cols and 
                           board[row_ind][col_ind+1] != center_val and
-                          board[row_ind][col_ind+1] in allowed_cells)
+                          board[row_ind][col_ind+1] in target_set)
     # up
     is_edge = is_edge or (row_ind-1 >= 0 and 
                           board[row_ind-1][col_ind] != center_val and
-                          board[row_ind-1][col_ind] in allowed_cells)
+                          board[row_ind-1][col_ind] in target_set)
     # down
     is_edge = is_edge or (row_ind+1 < n_rows and 
                           board[row_ind+1][col_ind] != center_val and
-                          board[row_ind+1][col_ind] in allowed_cells)
+                          board[row_ind+1][col_ind] in target_set)
     
     return is_edge
 
