@@ -1,5 +1,5 @@
 import numpy as np
-from core import Cell
+from core import Cell, get_neighbors
 from lazy_layers.layer import Layer
 import copy
 
@@ -25,7 +25,7 @@ class AddIsland(Layer):
 
         # Function to determine if a cell is an edge between land and ocean
         def is_edge_cell(r, c):
-            if board[r][c] == Cell.LAND:
+            if board[r][c] != Cell.OCEAN:
                 # Check adjacent cells for ocean
                 for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                     nr, nc = r + dr, c + dc
@@ -35,7 +35,7 @@ class AddIsland(Layer):
                 # Check adjacent cells for land
                 for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                     nr, nc = r + dr, c + dc
-                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == Cell.LAND:
+                    if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] != Cell.OCEAN:
                         return True
             return False
 
@@ -43,6 +43,10 @@ class AddIsland(Layer):
         for i in range(rows):
             for j in range(cols):
                 if is_edge_cell(i, j):
-                    next_board[i][j] = Cell.LAND if rng.uniform(0.0, 1.0) < AddIsland.P_LAND else Cell.OCEAN
+                    neighbors = get_neighbors(board, i, j, 1).flatten()
+                    index = np.argwhere(neighbors == Cell.OCEAN)
+                    neighbors = np.delete(neighbors, index)
+                    neighbor = rng.choice(neighbors)
+                    next_board[i][j] = neighbor if rng.uniform(0.0, 1.0) < AddIsland.P_LAND else Cell.OCEAN
 
         return next_board

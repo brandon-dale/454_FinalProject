@@ -10,8 +10,10 @@ class WarmToTemperate(Layer):
     Any warm land adjacent to a cool or freezing region will turn into a temperate one instead.
     """
     
-    def __init__(self):
+    def __init__(self, radius: int = 1):
         """Constructs a new WarmToTemperate Layer Object"""
+        super().__init__()
+        self.radius = radius
     
     def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         """
@@ -29,6 +31,6 @@ class WarmToTemperate(Layer):
             for j in range(cols):
                 curr: Cell = board[i][j]
                 if is_edge_cell(board, i, j, group_a, group_b):
-                    next_board = set_board_region(board, i, j, 1, Cell.TEMPERATE)
+                    next_board = set_board_region(board, i, j, self.radius, Cell.TEMPERATE)
         
         return next_board

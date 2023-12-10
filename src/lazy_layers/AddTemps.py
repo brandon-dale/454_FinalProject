@@ -15,6 +15,8 @@ class AddTemps(Layer):
     def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         for i in range(board.shape[0]):
             for j in range(board.shape[1]):
+                if board[i][j] == Cell.OCEAN:
+                    continue
                 # Generate a random number to determine the temperature
                 temp = rng.integers(1, 7)  # 1-6 range, where 1-4 are warm, 5 is cold, 6 is freezing
                 if temp <= 4:

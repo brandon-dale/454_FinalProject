@@ -10,8 +10,9 @@ class FreezingToCold(Layer):
     Convert all things within a square radius around center cell
     """
     
-    def __init__(self, radius: int):
+    def __init__(self, radius: int = 1):
         """Constructs a new FreezingToCold Layer Object"""
+        super().__init__()
         assert radius >= 0
         self.radius = radius
     

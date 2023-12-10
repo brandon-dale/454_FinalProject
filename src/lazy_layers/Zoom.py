@@ -1,5 +1,7 @@
 import numpy as np
 from lazy_layers.layer import Layer
+from core import is_edge_cell
+
 
 class Zoom(Layer):
     """
@@ -25,7 +27,7 @@ class Zoom(Layer):
         for i in range(rows):
             for j in range(cols):
                 # Only process edge cells
-                if i == 0 or i == rows - 1 or j == 0 or j == cols - 1:
+                if is_edge_cell(scaled_board, i, j):
                     # Generate xoff and yoff from a Gaussian distribution
                     xoff = rng.choice(indexes)
                     yoff = rng.choice(indexes)

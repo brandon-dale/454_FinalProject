@@ -1,5 +1,7 @@
 import numpy as np
 from lazy_layers.layer import Layer
+from core import is_edge_cell
+
 
 class FuzzyZoom(Layer):
     """
@@ -20,13 +22,12 @@ class FuzzyZoom(Layer):
         """
         # Scale the board by a factor of 2
         scaled_board = np.repeat(np.repeat(board, 2, axis=0), 2, axis=1)
-     
         rows, cols = scaled_board.shape
-
+        
         for i in range(rows):
             for j in range(cols):
                 # Only process edge cells
-                if i == 0 or i == rows - 1 or j == 0 or j == cols - 1:
+                if is_edge_cell(scaled_board, i, j):
                     # Generate xoff and yoff uniformly from [-1, 0, 1]
                     xoff = rng.integers(-1, 2)
                     yoff = rng.integers(-1, 2)
@@ -37,19 +38,4 @@ class FuzzyZoom(Layer):
                     scaled_board[i][j] = scaled_board[new_i][new_j]
 
         return scaled_board
-        scaled_board = np.repeat(np.repeat(board, 2, axis=0), 2, axis=1)
-        
-        rows, cols = scaled_board.shape
-        
-        for i in range(rows):
-            for j in range(cols):
-                
-                # Get random offsets
-                xoff, yoff = rng.integers(-1, 2, 2)
-                
-                 # Update the cell value
-                new_i = max(0, min(rows - 1, i + xoff))
-                new_j = max(0, min(cols - 1, j + yoff))
-                scaled_board[i][j] = scaled_board[new_i][new_j]
-        
-        return scaled_board
+

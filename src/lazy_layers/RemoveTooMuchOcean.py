@@ -1,14 +1,15 @@
 import numpy as np
 from lazy_layers.layer import Layer
 import copy
-from core import Cell
+from core import Cell, get_neighbors
 
 class RemoveTooMuchOcean(Layer):
     """
     Processing layer in world generation.
-    All ocean regions surrounded by more ocean have a 50% chance of becoming land.
+    All ocean regions surrounded by more ocean have a P_LAND chance of becoming land.
     Only check up/down and left/right.
     """
+    P_LAND = 0.35
     
     def __init__(self):
         """Constructs a new RemoveTooMuchOcean Layer Object"""
@@ -23,14 +24,19 @@ class RemoveTooMuchOcean(Layer):
         """
         new_board = copy.deepcopy(board)
         rows, cols = board.shape
-
+        
+        # def is_deep_ocean(x, y):
+        #     SEARCH_RADIUS = 2
+        #     neighbors = get_neighbors(board, x, y, SEARCH_RADIUS).flatten()
+        #     return np.unique(neighbors) == 1
+            
         for i in range(rows):
             for j in range(cols):
                 if board[i, j] == Cell.OCEAN:  # Assuming 0 represents ocean
                     # Check if surrounded by ocean
                     if self.is_surrounded_by_ocean(board, i, j):
                         # 50% chance to become land
-                        if rng.uniform(0., 1.) < 0.5:
+                        if rng.uniform(0., 1.) < RemoveTooMuchOcean.P_LAND:
                             new_board[i, j] = Cell.LAND  # Assuming 1 represents land
 
         return new_board

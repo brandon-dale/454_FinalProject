@@ -42,6 +42,9 @@ class Cell(enum.IntEnum):
     DEEP_OCEAN = 62
     SHALLOW_OCEAN = 63
     
+    def __repr__(self):
+        return str(self.value)
+    
 
 def np_random(seed: Optional[int] = None) -> Tuple[np.random.Generator, Any]:
     """Generates a random number generator from the seed and returns the Generator and seed.
@@ -64,13 +67,17 @@ def np_random(seed: Optional[int] = None) -> Tuple[np.random.Generator, Any]:
 # map cell states to RGB colors
 _COLOR_MAP = {
     # ------ Land vs Ocean ------ #
-    Cell.OCEAN: (30,144,255),
+    Cell.OCEAN: (0,0,255),
     Cell.LAND: 	(255,250,205),
     # ------ Temperature ------ #
-    Cell.FREEZING: (0, 76, 153),
-    Cell.COLD: (0, 102, 204),
-    Cell.TEMPERATE: (255, 204, 153),
-    Cell.WARM: (255, 128, 0),
+    # Cell.FREEZING: (216, 255, 255),
+    # Cell.COLD: (3, 127, 81),
+    # Cell.TEMPERATE: (255, 204, 153),
+    # Cell.WARM: (193, 168, 107),
+    Cell.FREEZING: (255, 255, 255),
+    Cell.COLD: (127, 127, 127),
+    Cell.TEMPERATE: (0, 255, 0),
+    Cell.WARM: (255, 0, 0),
     # ------ Biomes ------ #
     # FREEZING
     Cell.TUNDRA: (153, 255, 255),
@@ -182,7 +189,7 @@ def is_edge_cell(board: np.ndarray,
     n_rows, n_cols = board.shape
     center_val = board[row_ind][col_ind]
     is_edge: bool = False
-    
+
     if group_a is None:
         group_a = set([center_val])
         group_b = set([e.value for e in Cell if e not in group_a])
@@ -190,8 +197,8 @@ def is_edge_cell(board: np.ndarray,
     if center_val not in group_a and center_val not in group_b:
         return False
     
-    key_set = group_a if center_val in group_a else group_b
-    target_set = group_b if center_val in group_b else group_a
+    # key_set = group_a if center_val in group_a else group_b
+    target_set = group_b if center_val in group_a else group_a
     
     # left
     is_edge = is_edge or (col_ind-1 >= 0 and 
@@ -226,7 +233,8 @@ def set_board_region(board: np.ndarray, row_ind: int, col_ind: int, radius: int,
     
     for i in range(i_start, i_end):
         for j in range(j_start, j_end):
-            board[i][j] = set_val
+            if board[i][j] != Cell.OCEAN:
+                board[i][j] = set_val
     
     return board
     
