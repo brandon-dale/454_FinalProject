@@ -16,7 +16,6 @@ class Island(Layer):
     def run(self, dims: int, rng: np.random.Generator) -> np.ndarray:
         """
         Runs the layer for a single step
-        Implemented in child classes
         :param dims: the resulting dimensions of the board
         :param rng: a random number generator to use
         :return: A new copy of the board after the transformation

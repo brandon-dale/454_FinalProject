@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Any
 
 class Layer:
     """
@@ -7,7 +8,7 @@ class Layer:
     def __init__(self):
         """Constructs a new Layer Object"""
     
-    def run(self, board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    def run(self, board: np.ndarray, rng: np.random.Generator) -> Any:
         """
         Runs the layer for a single step
         Implemented in child classes
