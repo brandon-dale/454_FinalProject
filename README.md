@@ -40,3 +40,10 @@ active value. Then, no copies have to be made of the entire board. Twice the sto
 | 19 | AddIsland          | 512x512   | 40.43% | 156159.18 |
 | 20 | Zoom               | 1024x1024 | 28.30% | 751828.99 |
 
+
+## PLAN
+- Use the buffer board for each step
+- Run all steps as normal
+- At step 16, run as normal, then create the edge map
+- for all subsequent maps, use the edge map for processing
+
