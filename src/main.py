@@ -1,8 +1,8 @@
 import numpy as np
 import time
 from matplotlib import pyplot as plt
- 
-from core import np_random, draw, Cell, make_gif, EdgeMap
+
+from core import np_random, draw, make_gif, Board
 from lazy_layers.AddIsland import AddIsland
 from lazy_layers.AddTemps import AddTemps
 from lazy_layers.FreezingToCold import FreezingToCold
@@ -10,15 +10,15 @@ from lazy_layers.FuzzyZoom import FuzzyZoom
 from lazy_layers.Island import Island
 from lazy_layers.RemoveTooMuchOcean import RemoveTooMuchOcean
 from lazy_layers.Shore import Shore
-from lazy_layers.Smooth import Smooth
 from lazy_layers.TemperatureToBiome import TemperatureToBiome
 from lazy_layers.WarmToTemperate import WarmToTemperate
 from lazy_layers.Zoom import Zoom
 
-from smart_layers.Island import Smart_Island
+from smart_layers.SmartZoom import SmartZoom
+from smart_layers.SmartAddIsland import SmartAddIsland
 
 
-def build(rng: np.random.Generator, drawBoards: bool = False) -> np.ndarray:
+def lazy_build(rng: np.random.Generator, drawBoards: bool = False, verbose: bool=False) -> np.ndarray:
     # specify the build stack
     stack = [
         Island(),
@@ -29,7 +29,6 @@ def build(rng: np.random.Generator, drawBoards: bool = False) -> np.ndarray:
         AddIsland(),
         AddIsland(),
         RemoveTooMuchOcean(),
-        # Smooth(),
         AddTemps(),
         AddIsland(),
         WarmToTemperate(1),
@@ -43,18 +42,17 @@ def build(rng: np.random.Generator, drawBoards: bool = False) -> np.ndarray:
         Zoom(),
         AddIsland(),
         Zoom(),
-        # Shore(),
-        # Zoom(), # PUT THIS LAYER BACK IN AFTER SPARSITY TESTING
-        # Zoom()
     ]
     
     # ----- Run the stack ----- #
-    print(f"\n----- RUNNING BUILD STACK -----")
+    if verbose:
+        print(f"\n----- RUNNING BUILD STACK -----")
     start_time = time.time()
     board = None
     for i, layer in enumerate(stack):
         # Run Layer
-        print(f"Running Layer : {layer.__class__.__name__} {i}")
+        if verbose:
+            print(f"Running Layer : {layer.__class__.__name__} {i}")
         if i == 0:
             board: np.ndarray = layer.run(4, rng)
         else:
@@ -63,17 +61,93 @@ def build(rng: np.random.Generator, drawBoards: bool = False) -> np.ndarray:
         # Draw Board
         if drawBoards:
             n, m = board.shape
-            title = f"{layer.__class__.__name__} - ({n}, {m})"
+            title = f"({i}) - {layer.__class__.__name__} - ({n}, {m})"
             file_name = f"{i}_" + str(layer.__class__.__name__)
             draw(board, title, file_name)
     
-    print("\n--- %s seconds ---" % (time.time() - start_time), end="\n\n")
+    if verbose:
+        print("\n--- %s seconds ---" % (time.time() - start_time), end="\n\n")
+    return board
+
+
+def smart_build(rng: np.random.Generator, drawBoards: bool = False, verbose: bool = False) -> np.ndarray:
+    # specify the build stack
+    dumb_stack = [
+        Island(),
+        FuzzyZoom(),
+        AddIsland(),
+        Zoom(),
+        AddIsland(),
+        AddIsland(),
+        AddIsland(),
+        RemoveTooMuchOcean(),
+        AddTemps(),
+        AddIsland(),
+        WarmToTemperate(1),
+        FreezingToCold(1),
+        Zoom(),
+        Zoom(),
+        AddIsland(),
+        TemperatureToBiome(),
+    ]
+    smart_stack = [
+        SmartZoom(),
+        SmartZoom(),
+        SmartZoom(),
+        SmartAddIsland(),
+        SmartZoom(),
+    ]
+    
+    # ----- Run the stack ----- #
+    if verbose:
+        print(f"\n----- RUNNING DUMB BUILD STACK -----")
+    start_time = time.time()
+    board = None
+    layer_num = 0
+    for i, layer in enumerate(dumb_stack):
+        layer_num = i
+        # Run Layer
+        if verbose:
+            print(f"Running Layer : {layer.__class__.__name__} {i}")
+        if i == 0:
+            board: np.ndarray = layer.run(4, rng)
+        else:
+            board = layer.run(board, rng)
+        
+        # Draw Board
+        if drawBoards:
+            n, m = board.shape
+            title = f"({layer_num}) - {layer.__class__.__name__} - ({n}, {m})"
+            file_name = f"{i}_" + str(layer.__class__.__name__)
+            draw(board, title, file_name) # draw ndarray
+    
+    if verbose:
+        print(f"\n----- RUNNING SMART BUILD STACK -----")
+    
+    board = Board(board.shape[0], board)
+    for i, layer in enumerate(smart_stack):
+        layer_num += 1
+        if verbose:
+            print(f"Running Layer : {layer.__class__.__name__} {layer_num}")
+        layer.run(board, rng)
+        
+        # Draw Board
+        if drawBoards:
+            n = board.dims
+            title = f"({layer_num}) - {layer.__class__.__name__} - ({n}, {n})"
+            file_name = f"{layer_num}_" + str(layer.__class__.__name__)
+            board.draw(title, file_name) # draw board
+    
+    if verbose:
+        print("\n--- %s seconds ---" % (time.time() - start_time), end="\n\n")
     return board
 
 
 def test_sparsity(iters: int, base_rng: np.random.Generator):
-    """Get the mean sparcity of iters iterations of randomly generated boards"""
-    # specify the build stack
+    """
+    Get the mean sparcity of iters iterations of randomly generated boards
+    """
+    # Specify the build stack
     stack = [
         Island(),
         FuzzyZoom(),
@@ -83,7 +157,6 @@ def test_sparsity(iters: int, base_rng: np.random.Generator):
         AddIsland(),
         AddIsland(),
         RemoveTooMuchOcean(),
-        # Smooth(),
         AddTemps(),
         AddIsland(),
         WarmToTemperate(1),
@@ -97,9 +170,6 @@ def test_sparsity(iters: int, base_rng: np.random.Generator):
         Zoom(),
         AddIsland(),
         Zoom(),
-        # Shore(),
-        # Zoom(), # PUT THIS LAYER BACK IN AFTER SPARSITY TESTING
-        # Zoom()
     ]
     
     # Setup the history dict -- idx -> (mean_sparsity, layer_type)
@@ -161,40 +231,32 @@ def test_sparsity(iters: int, base_rng: np.random.Generator):
     return history
 
 
-
-def pretty_print_map(_map):
-    print("---- MAPPING ----")
-    for r, c in _map:
-        print(f"({r:2}, {c:2}) --> {_map[(r, c)]}")
-    print('\n-----------------\n\n')
-
-
+def speed_test(iters, rng: np.random.Generator, builder):
+    """
+    Run an average speed test on the specified builder function
+    """
+    avg_speed = 0.
+    for _ in range(iters):
+        start_time = time.time()
+        board = builder(rng, drawBoards=False)
+        ex_time = time.time() - start_time
+        avg_speed += ex_time
+    avg_speed /= iters
+    print(f"Average Speed: {avg_speed}")
+    
+    
 def main():
-    SEED = 473443303
+    SEED = 849474937830
     rng, _ = np_random(seed=SEED)
     
-    # edge_map = EdgeMap(4)
-    # edges = [
-    #     (0, 1, 0), (0, 2, 0), (1, 0, 0), (1, 1, 1), (1, 2, 1), (1, 3, 0), (2, 0, 0), (2, 1, 1),
-    #     (2, 2, 0), (3, 1, 0)
-    # ]
-    # for r, c, val in edges:
-    #     edge_map.addEdge(r, c, val)
-    # pretty_print_map(edge_map.map)
-    # edge_map.scale()
-    # pretty_print_map(edge_map.map)
+    # Build the lazy board :(
+    board = lazy_build(rng, True)    
     
-    # island = Smart_Island()
-    # edge_map: EdgeMap = island.run(4, rng)
-    # pretty_print_map(edge_map.map)
-    # edge_map.draw("Basic Edge Map", "edge_map_test_1")
+    # Build the smart board
+    # board = smart_build(rng, drawBoards=True)
     
-    board = build(rng, drawBoards=True)
-    draw(board, "main board", 'main_board')
+    make_gif('src/imgs', f"lazy_gif_{SEED}")
     
-    # make_gif('src/imgs', f"Map_Generation_Lazy_{SEED}.gif")
-
     
-
 if __name__ == '__main__':
     main()

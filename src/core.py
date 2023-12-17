@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import enum
 import glob
+import os
 import contextlib
 from PIL import Image
 
@@ -107,25 +108,35 @@ _COLOR_MAP = {
 }
 
 
-def draw(board: np.ndarray, title: str, out_file: str=None) -> None:
+def draw(board: Any, title: str, out_file: str=None) -> None:
     """
     Draws the board
-    :param board: the board the draw
+    :param board: the board the draw (np.ndarray or Board object)
     :param title: the name of the title for the plot
     :param out_file: optional, if set, an output file will be created
                      instead of drawing in interactive window
 
     """
     # Expand board to RGB image
-    assert board.shape[0] == board.shape[1], "CANNOT DRAW A NON-SQUARE BOARD"
-    dim = board.shape[0]
-    colors = np.zeros((board.shape + (3,)), dtype=int)
-    for i in range(dim):
-        for j in range(dim):
-            r, g, b = _COLOR_MAP[board[i, j]]
-            colors[i, j, 0] = r
-            colors[i, j, 1] = g
-            colors[i, j, 2] = b
+    if isinstance(board, np.ndarray):
+        assert board.shape[0] == board.shape[1], "CANNOT DRAW A NON-SQUARE BOARD"
+        dim = board.shape[0]
+        colors = np.zeros((board.shape + (3,)), dtype=int)
+        for i in range(dim):
+            for j in range(dim):
+                r, g, b = _COLOR_MAP[board[i, j]]
+                colors[i, j, 0] = r
+                colors[i, j, 1] = g
+                colors[i, j, 2] = b
+    elif isinstance(board, Board):
+        dim = board.dims
+        colors = np.zeros(((dim, dim) + (3,)), dtype=int)
+        for i in range(dim):
+            for j in range(dim):
+                r, g, b = _COLOR_MAP[board.board[i][j][board.current_board_idx]]
+                colors[i, j, 0] = r
+                colors[i, j, 1] = g
+                colors[i, j, 2] = b
 
     plt.imshow(colors, extent=[0, dim, 0, dim])
     ax = plt.gca()
@@ -141,7 +152,15 @@ def draw(board: np.ndarray, title: str, out_file: str=None) -> None:
     
 
 def make_gif(img_dir_path: str, out_file_path: str) -> None:
-    raise NotImplementedError
+    # Get the paths sorted
+    paths = glob.glob(img_dir_path + '/*.png')
+    paths.sort(key=lambda x: int(os.path.basename(x).split('_')[0]))
+    
+    # Make the GIF
+    frames = [Image.open(image) for image in paths]
+    frame_one = frames[0]
+    frame_one.save(out_file_path + ".gif", format="GIF", append_images=frames,
+               save_all=True, duration=1000, loop=0)
 
 
 def in_bounds(board: np.ndarray, row_ind: int, col_ind: int):
@@ -156,7 +175,7 @@ def in_bounds(board: np.ndarray, row_ind: int, col_ind: int):
     return row_ind >= 0 and col_ind >= 0 and row_ind < num_rows and col_ind < num_cols
 
 
-def get_neighbors(board: np.ndarray, row_ind: int, col_ind: int, radius: int = 1):
+def get_neighbors(board: Any, row_ind: int, col_ind: int, radius: int = 1):
     """
     Returns a copy of the neighbors in a radius of the specified cell on the board
     ex:
@@ -165,12 +184,22 @@ def get_neighbors(board: np.ndarray, row_ind: int, col_ind: int, radius: int = 1
     3 4 5 6  ----->   3 4 5
     4 5 6 7
     """
-    n_rows, n_cols = board.shape
-    i_start = max(0, row_ind-radius)
-    i_end = min(row_ind+1+radius, n_rows)
-    j_start = max(0, col_ind-radius)
-    j_end = min(col_ind+1+radius, n_cols)
-    return board[i_start:i_end, j_start:j_end]
+    if isinstance(board, np.ndarray):
+        n_rows, n_cols = board.shape
+        i_start = max(0, row_ind-radius)
+        i_end = min(row_ind+1+radius, n_rows)
+        j_start = max(0, col_ind-radius)
+        j_end = min(col_ind+1+radius, n_cols)
+        return board[i_start:i_end, j_start:j_end]
+    elif isinstance(board, Board):
+        dims = board.dims
+        i_start = max(0, row_ind-radius)
+        i_end = min(row_ind+1+radius, dims)
+        j_start = max(0, col_ind-radius)
+        j_end = min(col_ind+1+radius, dims)
+        return board.board[i_start:i_end, j_start:j_end, board.current_board_idx]
+    else:
+        raise KeyError
 
 
 def is_edge_cell(board: np.ndarray, 
@@ -277,7 +306,7 @@ class EdgeMap:
                 if is_edge_cell(r, c):
                     self.map[(r, c)] = board[r][c]
         
-    def addEdge(self, r: int, c: int, cellVal: Cell, valid: bool = True) -> None:
+    def addEdge(self, r: int, c: int, cellVal: Cell = None, valid: bool = True) -> None:
         """
         Add an edge to the edge map
         Automatically handles edge detection
@@ -287,7 +316,7 @@ class EdgeMap:
         :param cellVal: the value of the cell to set
         """
         # Boundary check
-        if (r < 0) or (r >= self.dims) or (c < 0) or (c >= self.dims):
+        if cellVal is None or (r < 0) or (r >= self.dims) or (c < 0) or (c >= self.dims):
             return
 
         # Add edge
@@ -369,6 +398,10 @@ class EdgeMap:
         :param check_all: if true, check all cells in map. if false
                           only check cells in check list
         """
+        # TEMP REMOVE ME!!!!
+        # print(f"---- REMOVING NON EDGE CELLS ({len(self.map)}) ----")
+        # orig_size = len(self.map)
+        
         if check_all:
             for r, c in [*self.map]:
                 neighbors = [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]
@@ -384,6 +417,11 @@ class EdgeMap:
                 if len(vals) == 1 and self.map[(r, c)] == vals[0]:
                     self.map.pop((r, c))
             self.check = []
+        
+        # new_size = len(self.map)
+        # print(f"---- DONE REMOVE NON EDGE CELLS ({orig_size} -> {new_size}) ----")
+        # print(f"    Remove {orig_size - new_size} cells")
+
 
     def sparsity(self) -> float:
         """Returns the sparcity of the edge map"""
@@ -425,7 +463,7 @@ class Board:
         Next is the board at time step t + 1, should only set values here
     """
     
-    def __init__(self, dims: int):
+    def __init__(self, dims: int, board: np.ndarray = None):
         """
         Initializes a new board object around an existing board
         """
@@ -436,6 +474,14 @@ class Board:
         # Tracks which board is the current board and next board
         self.current_board_idx = 0
         self.next_board_idx = 1
+        self.edge_map = None # empty edge map
+        
+        # read in the board if it exists
+        if board is not None:
+            self.dims = board.shape[0]
+            for r in range(self.dims):
+                for c in range(self.dims):
+                    self.board[r][c][self.current_board_idx] = board[r][c]
     
     def swap_buffers(self):
         """
@@ -454,19 +500,31 @@ class Board:
         """
         self.board[r][c][self.next_board_idx] = val
         
-    def get_cell(self, r: int, c: int, val: Cell):
+    def get(self, r: int, c: int):
         """
         Gets the value of the cell in the current board state.
-        DOES NOT DO BOUNDS CHECKING
+        Returns None on out of bounds
         """
-        return self.board[r][c][self.current_board_idx]
+        return self.board[r][c][self.current_board_idx] if 0 <= r < self.dims and 0 <= c < self.dims else None
 
     def scale(self):
         """scales the board by a factor of 2"""
         self.board = np.repeat(np.repeat(self.board, 2, axis=0), 2, axis=1)
+        
+        curr_ind = self.current_board_idx
+        next_ind = self.next_board_idx
         self.dims *= 2
+        
+        for r in range(self.dims):
+            for c in range(self.dims):
+                self.board[r][c][next_ind] = self.board[r][c][curr_ind]
+        
+            
+        if self.edge_map is not None:
+            self.edge_map.scale()
     
-    def is_edge_cell(self, r, c):
+    def is_edge_cell(self, r: int, c: int):
+        """Assumes r, c are valid in board"""
         key = self.board[r][c][self.current_board_idx]
         # Check adjacent cells for ocean
         for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -474,3 +532,35 @@ class Board:
             if 0 <= nr < self.dims and 0 <= nc < self.dims and self.board[nr][nc][self.current_board_idx] != key:
                 return True
         return False
+
+    def activate_edge_map(self):
+        if self.edge_map is None:
+            self.edge_map = EdgeMap(self.dims)
+
+    def draw(self, title: str, out_file: str=None):
+        """
+        draws board
+        Copy of regular drawing function for ndarray
+        Please don't read this Ravi
+        """
+        dim = self.dims
+        colors = np.zeros(((dim, dim) + (3,)), dtype=int)
+        for i in range(dim):
+            for j in range(dim):
+                r, g, b = _COLOR_MAP[self.board[i][j][self.current_board_idx]]
+                colors[i, j, 0] = r
+                colors[i, j, 1] = g
+                colors[i, j, 2] = b
+
+        plt.imshow(colors, extent=[0, dim, 0, dim])
+        ax = plt.gca()
+        ticks = np.arange(0, dim + 1, int(dim/4.))
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        plt.title(title)
+        
+        if out_file is not None:
+            plt.savefig('src/imgs/' + out_file)
+        else:
+            plt.show()
+
