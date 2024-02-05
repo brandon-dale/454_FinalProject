@@ -8,9 +8,11 @@ we were able to increase the efficiency by 2.75x on average.
 
 ## SETUP
 ```
-
-
-
+git clone https://github.com/brandon-dale/454_FinalProject.git
+cd 454_FinalProject
+virtualenv -p python3 .
+source ./bin/activate
+pip install -r requirements.txt
 ```
 
 ## Average Stack Sparsity Levels
