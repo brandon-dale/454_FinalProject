@@ -1,7 +1,10 @@
 # 454_FinalProject
-SSU - CS 454 - Final Project - Accelerating Stochastic Cellular Automaton Random World Generation
+SSU - CS 454 - Final Project - Accelerating Random World Generation with Stochastic Cellular Automaton
 
-
+This project explores how to efficiently increase the random world generation algorithm for biome maps. The base algorithm
+is based off of the core algorithms that are used within the videogame Minecraft. In this project, we present to different 
+algorithms (naive and "smart") which create identical biome maps from a given random seed integer. With our "smart" algorithm, 
+we were able to increase the efficiency by 2.75x on average.
 
 ## SETUP
 ```
@@ -9,11 +12,6 @@ SSU - CS 454 - Final Project - Accelerating Stochastic Cellular Automaton Random
 
 
 ```
-
-## NOTES
-- Speedup could be further increased if each cell on the board was a tuple and we just toggled which one is the
-active value. Then, no copies have to be made of the entire board. Twice the storage, but a good time saver.
-
 
 ## Average Stack Sparsity Levels
 |Stack Number | Layer Type | Dimensions | Avg. Sparsity | Avg Number of Unnecessary Updates |
@@ -39,11 +37,4 @@ active value. Then, no copies have to be made of the entire board. Twice the sto
 | 18 | Zoom               | 512x512   | 34.81% | 170891.67 |
 | 19 | AddIsland          | 512x512   | 40.43% | 156159.18 |
 | 20 | Zoom               | 1024x1024 | 28.30% | 751828.99 |
-
-
-## PLAN
-- Use the buffer board for each step
-- Run all steps as normal
-- At step 16, run as normal, then create the edge map
-- for all subsequent maps, use the edge map for processing
 
